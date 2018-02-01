@@ -3,6 +3,7 @@ package com.fefe.otamane.fragments
 import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.RecyclerView
 import android.view.*
 import android.widget.ImageView
@@ -10,6 +11,7 @@ import android.widget.TextView
 import com.bumptech.glide.Glide
 import com.fefe.otamane.R
 import com.fefe.otamane.activities.AddscheduleActivity
+import com.fefe.otamane.activities.ProductDetailActivity
 import com.fefe.otamane.datas.Product
 import com.fefe.otamane.fragments.dialog.ProductAddDialogFragment
 import io.realm.Realm
@@ -28,8 +30,8 @@ class ProductListFragment : Fragment(), ProductAddDialogFragment.OnProductCommit
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        setHasOptionsMenu(true)
-        (activity as AddscheduleActivity).supportActionBar?.title = "作品一覧"
+        if(activity is AddscheduleActivity)setHasOptionsMenu(true)
+        (activity as AppCompatActivity).supportActionBar?.title = "作品・アーティスト一覧"
         return inflater.inflate(R.layout.fragment_product_list, container, false)
     }
 

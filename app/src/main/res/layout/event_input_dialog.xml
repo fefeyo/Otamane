@@ -28,7 +28,7 @@
             android:layout_marginBottom="8dp"
             android:text="場所" />
 
-        <com.fefe.otamane.fragments.MyMapView
+        <com.google.android.gms.maps.MapView
             android:id="@+id/map"
             android:layout_width="match_parent"
             android:layout_height="200dp"

@@ -39,11 +39,12 @@ class MainActivity : AppCompatActivity() {
         setSupportActionBar(toolbar)
 
         val cal = Calendar.getInstance()
+        setDaySchedule(cal)
         caldroid = CaldroidFragment()
+
         caldroid?.arguments = Bundle().apply {
             putInt(CaldroidFragment.MONTH, cal.get(Calendar.MONTH) + 1)
             putInt(CaldroidFragment.YEAR, cal.get(Calendar.YEAR))
-            putBoolean(CaldroidFragment.ENABLE_CLICK_ON_DISABLED_DATES, true)
         }
 
         supportFragmentManager.beginTransaction().apply {
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity() {
                     true
                 }
                 R.id.product_schedule -> {
-                    Log.d("作品スケジュール", "だよ")
+                    startActivity(Intent(applicationContext, ProductDetailActivity::class.java))
                     true
                 }
                 R.id.goods_list -> {
@@ -151,7 +152,7 @@ class MainActivity : AppCompatActivity() {
             Realm.getDefaultInstance().use {
                 val dayEvents = it.where(Event::class.java).equalTo("date", cal.time).findAll()
                 val unmanagedDayEvents = it.copyFromRealm(dayEvents)
-                if(unmanagedDayEvents.size > 0) {
+                if(unmanagedDayEvents.isNotEmpty()) {
                     val product = it.where(Product::class.java).equalTo("id", unmanagedDayEvents[0].productid).findFirst()
                     val adapter = DayEventListAdapter(applicationContext, unmanagedDayEvents.toTypedArray(), it.copyFromRealm(product!!))
                     day_schedule.adapter = adapter

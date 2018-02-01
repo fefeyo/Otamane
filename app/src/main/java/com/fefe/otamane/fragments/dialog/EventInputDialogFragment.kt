@@ -18,8 +18,6 @@ import com.fefe.otamane.R
 import com.fefe.otamane.Utils.DBUtils
 import com.fefe.otamane.datas.Event
 import com.fefe.otamane.datas.Product
-import com.fefe.otamane.fragments.MyMapView
-import com.google.android.gms.location.places.Place
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
@@ -131,6 +129,7 @@ class EventInputDialogFragment : DialogFragment(), OnMapReadyCallback {
 
     override fun onMapReady(map: GoogleMap?) {
         this.map = map
+        map?.uiSettings?.isScrollGesturesEnabled = false
         map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.6983548, 139.7733992), 15f))
     }
 

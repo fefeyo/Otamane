@@ -105,7 +105,6 @@ class AddEventsFragment : Fragment(), EventListDialogFragment.OnChooseTypeListen
     //    イベント入力完了
     override fun onCommit(event: Event) {
         initAdapter()
-        println(event.toString())
     }
 
 
