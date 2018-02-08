@@ -5,32 +5,20 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="100dp">
-
-        <ImageView
-            android:id="@+id/event_image"
-            android:scaleType="centerCrop"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:src="@drawable/sample_header" />
+        android:layout_height="130dp">
 
         <View
             android:background="#000000"
-            android:alpha="0.3"
+            android:alpha="0.5"
             android:layout_width="match_parent"
             android:layout_height="match_parent"/>
 
-        <TextView
-            android:id="@+id/event_title"
-            android:textColor="#fff"
+        <ImageView
+            android:id="@+id/event_image"
+            android:scaleType="fitCenter"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="ラブライブ！サンシャイン！！"
-            android:textSize="24sp" />
+            android:layout_height="match_parent"
+            android:src="@drawable/sample_header" />
     </FrameLayout>
 
     <FrameLayout
@@ -45,7 +33,7 @@
 
         <TextView
             android:id="@+id/add_events_empty"
-            android:text="イベントが登録されていません"
+            android:text="追加するイベント一覧"
             android:gravity="center"
             android:visibility="gone"
             android:textSize="20sp"

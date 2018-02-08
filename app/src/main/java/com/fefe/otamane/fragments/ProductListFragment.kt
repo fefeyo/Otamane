@@ -22,7 +22,7 @@ class ProductListFragment : Fragment(), ProductAddDialogFragment.OnProductCommit
     private var listener: OnChooseProductListener? = null
 
     interface OnChooseProductListener {
-        fun onChoose(product: Product)
+        fun onChoose(productId: Long)
     }
 
     companion object {
@@ -86,7 +86,7 @@ class ProductListFragment : Fragment(), ProductAddDialogFragment.OnProductCommit
             val v: View = LayoutInflater.from(parent?.context).inflate(R.layout.product_list_row, parent, false)
             val holder = ProductListViewHolder(v)
             v.setOnClickListener({
-                listener?.onChoose(datas[holder.adapterPosition])
+                listener?.onChoose(datas[holder.adapterPosition].id)
             })
             return holder
         }

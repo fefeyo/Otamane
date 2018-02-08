@@ -1,15 +1,13 @@
 package com.fefe.otamane.datas
 
-import io.realm.RealmList
 import io.realm.RealmModel
-import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import java.io.Serializable
-import java.util.*
+import io.realm.annotations.RealmClass
 
 /**
  * Created by fefe on 2018/02/01.
  */
+@RealmClass
 open class Place(
         @PrimaryKey
         open var id: Long = 0,
@@ -19,4 +17,4 @@ open class Place(
         open var lat: Double? = 0.0,
         open var lng: Double? = 0.0,
         open var url: String? = ""
-) : RealmObject(), Serializable, RealmModel {}
+) : RealmModel {}

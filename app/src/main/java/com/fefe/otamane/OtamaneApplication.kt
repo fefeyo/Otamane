@@ -1,6 +1,7 @@
 package com.fefe.otamane
 
 import android.app.Application
+import com.beardedhen.androidbootstrap.TypefaceProvider
 import io.realm.Realm
 import io.realm.RealmConfiguration
 
@@ -13,5 +14,6 @@ class OtamaneApplication : Application() {
         super.onCreate()
         Realm.init(applicationContext)
         Realm.setDefaultConfiguration(RealmConfiguration.Builder().build())
+        TypefaceProvider.registerDefaultIconSets()
     }
 }

@@ -21,13 +21,14 @@ class EventListDialogFragment : DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val items = arrayOf("ライブ・イベント", "CD・BD・DVD発売日", "その他", "閉じる")
+        val items = arrayOf("ライブ・イベント", "CD・BD・DVD発売日", "その他", "イベントを検索", "閉じる")
         val builder = AlertDialog.Builder(activity as Activity)
         builder.setItems(items, { _, which ->
             when(which) {
                 0 -> listener?.onChoose(1)
                 1 -> listener?.onChoose(3)
                 2 -> listener?.onChoose(5)
+                3 -> listener?.onChoose(100)
             }
         })
 

@@ -15,11 +15,11 @@ import android.widget.TextView
 import com.beardedhen.androidbootstrap.BootstrapButton
 import com.beardedhen.androidbootstrap.BootstrapEditText
 import com.beardedhen.androidbootstrap.BootstrapLabel
-import com.beardedhen.androidbootstrap.api.view.BootstrapTextView
 import com.fefe.otamane.R
 import com.fefe.otamane.Utils.DBUtils
 import com.fefe.otamane.activities.AddscheduleActivity
 import com.fefe.otamane.datas.Event
+import com.fefe.otamane.datas.Place
 import com.fefe.otamane.datas.Product
 import com.google.android.gms.location.places.ui.PlaceAutocomplete
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -33,23 +33,23 @@ import java.util.*
 /**
  * Created by fefe on 2018/02/01.
  */
-class EventInputDialogFragment : DialogFragment(), OnMapReadyCallback {
-    private var listener: OnCommitEventListener? = null
+class EventEditDialogFragment : DialogFragment(), OnMapReadyCallback {
+    private var listener: OnEditEventListener? = null
     private val REQUEST_CODE = 100
-    private var place: com.fefe.otamane.datas.Place? = com.fefe.otamane.datas.Place()
+    private var event: Event? = Event()
+    private var place: Place? = Place()
     private var map: GoogleMap? = null
 
     companion object {
-        fun getInstance(productId: Long, type: Int) = EventInputDialogFragment().apply {
+        fun getInstance(eventId: Long) = EventEditDialogFragment().apply {
             arguments = Bundle().apply {
-                putLong("productId", productId)
-                putInt("type", type)
+                putLong("eventId", eventId)
             }
         }
     }
 
-    interface OnCommitEventListener {
-        fun onCommit(event: Event)
+    interface OnEditEventListener {
+        fun onEdit(event: Event)
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
@@ -62,16 +62,22 @@ class EventInputDialogFragment : DialogFragment(), OnMapReadyCallback {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.event_input_dialog, container, false)
-        val eventType = arguments?.get("type").toString().toInt()
-        val productId = arguments?.get("productId").toString().toInt()
+        val realm = AddscheduleActivity.realm
+        event = realm?.copyFromRealm(realm?.where(Event::class.java)?.equalTo("id", arguments?.getLong("eventId"))?.findFirst())
+        place = event?.place
         val map = view.findViewById<MapView>(R.id.map)
         map.onCreate(null)
         map.getMapAsync(this)
         dialog.setCancelable(false)
         val titleText = view.findViewById<BootstrapEditText>(R.id.input_title)
+        titleText.setText(event?.name)
         val memoText = view.findViewById<BootstrapEditText>(R.id.input_memo)
+        memoText.setText(event?.memo)
         val datePicker = view.findViewById<DatePicker>(R.id.input_date)
-        when (eventType) {
+        val cal = Calendar.getInstance()
+        cal.time = event?.date
+        datePicker.updateDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH), cal.get(Calendar.DATE))
+        when (event?.eventType) {
             1 -> {
                 view.findViewById<BootstrapLabel>(R.id.input_date_title).text = "イベント日程"
                 view.findViewById<BootstrapLabel>(R.id.input_place_title).text = "イベント会場"
@@ -87,30 +93,26 @@ class EventInputDialogFragment : DialogFragment(), OnMapReadyCallback {
             if (!TextUtils.isEmpty(titleText.text.toString())) {
                 val realm = AddscheduleActivity.realm
                 realm?.executeTransaction {
-                    val product = it.where(Product::class.java).equalTo("id", productId).findFirst()
-                    val event = it.createObject(Event::class.java, DBUtils.initEventId())
-                    event.name = titleText.text.toString()
-                    event.productid = productId
-                    event.memo = memoText.text.toString()
-                    event.eventType = eventType
+                    event?.name = titleText.text.toString()
+                    event?.memo = memoText.text.toString()
                     val cal = Calendar.getInstance()
                     cal.clear()
                     cal.set(datePicker.year, datePicker.month, datePicker.dayOfMonth)
-                    event.date = cal.time
+                    event?.date = cal.time
                     if (!TextUtils.isEmpty(place?.name)) {
                         val savePlace = it.copyToRealmOrUpdate(place)
-                        event.place = savePlace
+                        event?.place = savePlace
                     }
-                    product?.events?.add(event)
-                    listener?.onCommit(realm.copyFromRealm(event))
-                    dismiss()
+                    it.copyToRealmOrUpdate(event)
+                    listener?.onEdit(event!!)
+                    dialog.dismiss()
                 }
             } else {
                 titleText.error = "イベント名の入力は必須です"
             }
         }
         view.findViewById<BootstrapButton>(R.id.input_cancel).setOnClickListener {
-            dismiss()
+            listener?.onEdit(event!!)
         }
 
         return view
@@ -120,13 +122,12 @@ class EventInputDialogFragment : DialogFragment(), OnMapReadyCallback {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             val p = PlaceAutocomplete.getPlace(activity?.applicationContext, data)
-            place?.id = DBUtils.initPlaceId()
-            place?.name = p.name?.let { it.toString() }
-            place?.address = p.address?.let { it.toString() }
-            place?.phoneNumber = p.phoneNumber?.let { it.toString() }
+            place?.name = p.name.toString()
+            place?.address = p.address.toString()
+            place?.phoneNumber = p.phoneNumber.toString()
             place?.lat = p.latLng.latitude
             place?.lng = p.latLng.longitude
-            place?.url = p.websiteUri?.let { it.toString() }
+            place?.url = p.websiteUri.toString()
             map?.moveCamera(CameraUpdateFactory.newLatLngZoom(p.latLng, 18f))
         }
     }
@@ -148,13 +149,17 @@ class EventInputDialogFragment : DialogFragment(), OnMapReadyCallback {
         map?.uiSettings?.isMapToolbarEnabled = false
         map?.uiSettings?.isScrollGesturesEnabled = false
         map?.uiSettings?.isZoomGesturesEnabled = false
-        map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.6983548, 139.7733992), 18f))
+        if (event?.place != null) {
+            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(event?.place?.lat!!, event?.place?.lng!!), 18f))
+        } else {
+            map?.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(35.6983548, 139.7733992), 18f))
+        }
     }
 
 
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
-        listener = parentFragment as OnCommitEventListener
-        if (listener !is OnCommitEventListener) throw ClassCastException("リスナー登録失敗")
+        listener = parentFragment as OnEditEventListener
+        if (listener !is OnEditEventListener) throw ClassCastException("リスナー登録失敗")
     }
 }

@@ -153,8 +153,7 @@ class MainActivity : AppCompatActivity() {
                 val dayEvents = it.where(Event::class.java).equalTo("date", cal.time).findAll()
                 val unmanagedDayEvents = it.copyFromRealm(dayEvents)
                 if(unmanagedDayEvents.isNotEmpty()) {
-                    val product = it.where(Product::class.java).equalTo("id", unmanagedDayEvents[0].productid).findFirst()
-                    val adapter = DayEventListAdapter(applicationContext, unmanagedDayEvents.toTypedArray(), it.copyFromRealm(product!!))
+                    val adapter = DayEventListAdapter(applicationContext, unmanagedDayEvents.toTypedArray())
                     day_schedule.adapter = adapter
                     day_schedule.visibility = View.VISIBLE
                     day_event_empty.visibility = View.GONE
@@ -203,7 +202,7 @@ class MainActivity : AppCompatActivity() {
             return button
         }
 
-        inner class DayEventListAdapter(val context: Context, val datas: Array<Event>, val product: Product) : RecyclerView.Adapter<DayEventListAdapter.DayEventViewHolder>() {
+        inner class DayEventListAdapter(val context: Context, val datas: Array<Event>) : RecyclerView.Adapter<DayEventListAdapter.DayEventViewHolder>() {
 
             override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): DayEventViewHolder {
                 val v: View = LayoutInflater.from(parent?.context).inflate(R.layout.day_event_row, parent, false)
@@ -217,7 +216,15 @@ class MainActivity : AppCompatActivity() {
             override fun onBindViewHolder(holder: DayEventViewHolder?, position: Int) {
                 holder?.day_title?.text = datas[position].name
                 holder?.day_place?.text = datas[position].place?.name
-                Glide.with(context).load(product.image).into(holder?.day_image!!)
+                Realm.getDefaultInstance().use {
+                    val product = it.where(Product::class.java).equalTo("id", datas[position].productid).findFirst()
+                    Glide.with(context).load(product?.image).into(holder?.day_image!!)
+                }
+                holder?.itemView?.setOnClickListener {
+                    val intent = Intent(applicationContext, ProductDetailActivity::class.java)
+                    intent.putExtra("eventId", datas[position].id)
+                    startActivity(intent)
+                }
             }
 
             override fun getItemCount() = datas.size

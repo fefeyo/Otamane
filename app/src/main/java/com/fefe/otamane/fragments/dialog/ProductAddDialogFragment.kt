@@ -15,6 +15,7 @@ import android.widget.ImageButton
 import com.fefe.otamane.R
 import com.fefe.otamane.Utils.DBUtils
 import com.fefe.otamane.Utils.ImageUtils
+import com.fefe.otamane.activities.AddscheduleActivity
 import com.fefe.otamane.datas.Product
 import io.realm.Realm
 
@@ -53,12 +54,11 @@ class ProductAddDialogFragment : DialogFragment() {
         val button = dialog.getButton(DialogInterface.BUTTON_POSITIVE)
         button.setOnClickListener({
             if (!TextUtils.isEmpty(titleText?.text.toString())) {
-                Realm.getDefaultInstance().use { realm ->
-                    realm.executeTransaction {
-                        val product = realm.createObject(Product::class.java, DBUtils.initProductId())
-                        product.name = titleText?.text.toString()
-                        saveImage?.let { product.image = ImageUtils.createImageData(saveImage) }
-                    }
+                val realm = AddscheduleActivity.realm
+                realm?.executeTransaction {
+                    val product = it.createObject(Product::class.java, DBUtils.initProductId())
+                    product.name = titleText?.text.toString()
+                    saveImage?.let { product.image = ImageUtils.createImageData(saveImage) }
                 }
                 dialog.dismiss()
                 listener?.onCommit()
@@ -73,12 +73,12 @@ class ProductAddDialogFragment : DialogFragment() {
     override fun onAttach(activity: Activity?) {
         super.onAttach(activity)
         listener = parentFragment as OnProductCommitListener
-        if(listener !is OnProductCommitListener) throw ClassCastException("リスナー登録失敗")
+        if (listener !is OnProductCommitListener) throw ClassCastException("リスナー登録失敗")
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if(data != null) {
+        if (data != null) {
             imageButton?.setImageURI(data.data)
             saveImage = MediaStore.Images.Media.getBitmap(context?.contentResolver, data.data)
         }

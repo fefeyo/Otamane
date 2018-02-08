@@ -1,17 +1,16 @@
 package com.fefe.otamane.datas
 
-import io.realm.Realm
 import io.realm.RealmList
 import io.realm.RealmModel
-import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
-import java.io.Serializable
+import io.realm.annotations.RealmClass
 import java.util.*
 
 /**
  * Created by fefe on 2018/01/25.
  */
 //　各種イベントデータ(ファンミやライブなど)
+@RealmClass
 open class Event(
         @PrimaryKey
         open var id: Long = 0,
@@ -23,4 +22,4 @@ open class Event(
         open var date: Date? = null,
         open var goods: RealmList<Stuff>? = null,
         open var ticket: Ticket? = null
-) : RealmObject(), Serializable, RealmModel {}
+) : RealmModel {}
